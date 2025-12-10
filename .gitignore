@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Model files (too large for git)
+*.h5
+*.pkl
+*.onnx
+*.safetensors
+*.bin
+saved_models_indobert/
+emotion-detection-backend/app/ml/saved_models/
+emotion-detection-backend/app/ml/saved_models_id/
+emotion-detection-backend/app/ml/saved_models_id_v2/
+emotion-detection-backend/app/ml/saved_models_id_v3/
+emotion-detection-backend/app/ml/saved_models_indobert/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Docker
+docker-compose.override.yml

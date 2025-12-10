@@ -1,0 +1,287 @@
+{
+    "info": {
+        "name": "Emotion Detection API",
+        "description": "API for detecting emotions from text using AI (LSTM for English, IndoBERT for Indonesian)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health & Status",
+            "item": [
+                {
+                    "name": "Root",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/"
+                    }
+                },
+                {
+                    "name": "Health Check (English)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v1/health"
+                    }
+                },
+                {
+                    "name": "Health Check (Indonesian)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v1/health/id"
+                    }
+                },
+                {
+                    "name": "Get Emotions (English)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v1/emotions"
+                    }
+                },
+                {
+                    "name": "Get Emotions (Indonesian)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v1/emotions/id"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "English Predictions",
+            "item": [
+                {
+                    "name": "Predict - Joy",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"I am so happy and excited today!\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict - Sadness",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"I feel so sad and lonely\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict - Anger",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"I am furious and hate this!\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict - Fear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"I am scared about tomorrow\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict - Love",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"I love my family so much\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Batch Predict",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/batch",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"texts\": [\"I am happy\", \"I am sad\", \"I am angry\"]}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Indonesian Predictions",
+            "item": [
+                {
+                    "name": "Predict ID - Joy",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"Saya sangat senang dan bahagia!\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict ID - Sadness",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"Aku sedih banget hari ini\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict ID - Anger",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"Marah banget sama kamu!\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict ID - Fear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"Takut banget dengan keadaan ini\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict ID - Love",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"Aku cinta kamu selamanya\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Predict ID - Neutral",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"text\": \"Hari ini cuaca biasa saja\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Batch Predict ID",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/predict/id/batch",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"texts\": [\"Saya senang\", \"Saya sedih\", \"Saya marah\"]}"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

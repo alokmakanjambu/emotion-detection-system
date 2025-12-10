@@ -1,0 +1,189 @@
+"""
+Train Indonesian Emotion Model V3 - NO STEMMING.
+Uses slang normalization only, no Sastrawi stemming.
+"""
+import os
+import sys
+import numpy as np
+import pandas as pd
+import pickle
+import re
+from pathlib import Path
+from sklearn.preprocessing import LabelEncoder
+from sklearn.utils.class_weight import compute_class_weight
+import matplotlib.pyplot as plt
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import (
+    Embedding, LSTM, Dense, Dropout,
+    Bidirectional, SpatialDropout1D
+)
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.optimizers import Adam
+
+# Paths
+DATASET_DIR = r"d:\project-emotion-detected-system\dataset-bahasa-processed"
+SAVE_DIR = Path(__file__).parent.parent / "app" / "ml" / "saved_models_id_v3"
+
+# Hyperparameters
+MAX_WORDS = 15000
+MAX_LEN = 100
+EMBEDDING_DIM = 128
+BATCH_SIZE = 32
+EPOCHS = 100
+
+# Slang dictionary
+SLANG_DICT = {
+    'gak': 'tidak', 'ga': 'tidak', 'gk': 'tidak', 'ngga': 'tidak',
+    'nggak': 'tidak', 'enggak': 'tidak', 'tdk': 'tidak',
+    'yg': 'yang', 'dgn': 'dengan', 'utk': 'untuk', 'krn': 'karena',
+    'tp': 'tapi', 'jg': 'juga', 'sm': 'sama', 'bgt': 'banget',
+    'bngt': 'banget', 'skrg': 'sekarang', 'blm': 'belum',
+    'sdh': 'sudah', 'udh': 'sudah', 'kmrn': 'kemarin', 'bsk': 'besok',
+    'org': 'orang', 'lg': 'lagi', 'dr': 'dari', 'kl': 'kalau',
+    'klo': 'kalau', 'klu': 'kalau', 'emg': 'memang', 'gmn': 'bagaimana',
+    'gimana': 'bagaimana', 'knp': 'kenapa', 'spy': 'supaya',
+    'bkn': 'bukan', 'bnyk': 'banyak', 'sy': 'saya', 'ak': 'aku',
+    'gue': 'aku', 'gw': 'aku', 'lo': 'kamu', 'lu': 'kamu',
+    'doi': 'dia', 'dy': 'dia', 'mrk': 'mereka',
+}
+
+def preprocess_text(text):
+    """Simple preprocessing without stemming."""
+    if not text or not isinstance(text, str):
+        return ""
+    
+    text = text.lower()
+    text = re.sub(r'https?://\S+|www\.\S+', '', text)
+    text = re.sub(r'@\w+', '', text)
+    text = re.sub(r'#(\w+)', r'\1', text)
+    text = re.sub(r'\brt\b', '', text)
+    text = re.sub(r'(.)\1{2,}', r'\1\1', text)  # senaaang -> senang
+    text = re.sub(r'\d+', '', text)
+    text = re.sub(r'[^\w\s]', ' ', text)
+    
+    # Normalize slang
+    words = text.split()
+    words = [SLANG_DICT.get(w, w) for w in words]
+    text = ' '.join(words)
+    
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+def load_data(filepath):
+    df = pd.read_csv(filepath, sep=';', header=None, names=['text', 'label'])
+    df = df.dropna()
+    print(f"  Preprocessing {len(df)} texts...")
+    df['text'] = df['text'].apply(preprocess_text)
+    df = df[df['text'].str.len() > 0]
+    return df
+
+def build_model(vocab_size, num_classes):
+    model = Sequential([
+        Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_LEN),
+        SpatialDropout1D(0.3),
+        Bidirectional(LSTM(128, return_sequences=True)),
+        Dropout(0.4),
+        Bidirectional(LSTM(64)),
+        Dropout(0.4),
+        Dense(128, activation='relu'),
+        Dropout(0.3),
+        Dense(64, activation='relu'),
+        Dropout(0.2),
+        Dense(num_classes, activation='softmax')
+    ])
+    model.compile(optimizer=Adam(learning_rate=0.001),
+                  loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+def main():
+    print("="*70)
+    print("🇮🇩 TRAINING INDONESIAN MODEL V3 (No Stemming)")
+    print("="*70)
+    
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    
+    print("\n📂 Loading dataset...")
+    train_df = load_data(os.path.join(DATASET_DIR, "train.txt"))
+    val_df = load_data(os.path.join(DATASET_DIR, "val.txt"))
+    test_df = load_data(os.path.join(DATASET_DIR, "test.txt"))
+    
+    print(f"\n📊 Data: Train={len(train_df)}, Val={len(val_df)}, Test={len(test_df)}")
+    print(f"Distribution:\n{train_df['label'].value_counts()}")
+    
+    # Encode labels
+    label_encoder = LabelEncoder()
+    y_train = label_encoder.fit_transform(train_df['label'])
+    y_val = label_encoder.transform(val_df['label'])
+    y_test = label_encoder.transform(test_df['label'])
+    
+    num_classes = len(label_encoder.classes_)
+    print(f"\nClasses ({num_classes}): {list(label_encoder.classes_)}")
+    
+    # Tokenize
+    print("\n📝 Tokenizing...")
+    tokenizer = Tokenizer(num_words=MAX_WORDS, oov_token='<OOV>')
+    tokenizer.fit_on_texts(train_df['text'])
+    
+    X_train = pad_sequences(tokenizer.texts_to_sequences(train_df['text']), maxlen=MAX_LEN)
+    X_val = pad_sequences(tokenizer.texts_to_sequences(val_df['text']), maxlen=MAX_LEN)
+    X_test = pad_sequences(tokenizer.texts_to_sequences(test_df['text']), maxlen=MAX_LEN)
+    
+    vocab_size = min(len(tokenizer.word_index) + 1, MAX_WORDS)
+    print(f"Vocabulary size: {vocab_size}")
+    
+    # Class weights
+    class_weights = dict(zip(np.unique(y_train),
+        compute_class_weight('balanced', classes=np.unique(y_train), y=y_train)))
+    print(f"\n⚖️ Class weights: {class_weights}")
+    
+    # Build & Train
+    print("\n🏗️ Building model...")
+    model = build_model(vocab_size, num_classes)
+    model.summary()
+    
+    callbacks = [
+        EarlyStopping(monitor='val_loss', patience=7, restore_best_weights=True, verbose=1),
+        ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=0.00001, verbose=1)
+    ]
+    
+    print("\n🚀 Training...")
+    history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
+                       epochs=EPOCHS, batch_size=BATCH_SIZE,
+                       callbacks=callbacks, class_weight=class_weights, verbose=1)
+    
+    # Evaluate
+    print("\n📈 Evaluating...")
+    loss, acc = model.evaluate(X_test, y_test, verbose=0)
+    print(f"   Test Accuracy: {acc*100:.2f}%")
+    
+    # Save
+    print("\n💾 Saving...")
+    model.save(str(SAVE_DIR / "emotion_lstm_id_v3.h5"))
+    with open(str(SAVE_DIR / "tokenizer.pkl"), 'wb') as f:
+        pickle.dump(tokenizer, f)
+    with open(str(SAVE_DIR / "label_encoder.pkl"), 'wb') as f:
+        pickle.dump(label_encoder, f)
+    
+    # Plot
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    axes[0].plot(history.history['accuracy'], label='Train')
+    axes[0].plot(history.history['val_accuracy'], label='Val')
+    axes[0].set_title('Accuracy'); axes[0].legend(); axes[0].grid(True, alpha=0.3)
+    axes[1].plot(history.history['loss'], label='Train')
+    axes[1].plot(history.history['val_loss'], label='Val')
+    axes[1].set_title('Loss'); axes[1].legend(); axes[1].grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(str(SAVE_DIR / "training_history.png"), dpi=300)
+    plt.close()
+    
+    print("\n" + "="*70)
+    print(f"✅ TRAINING COMPLETE! Test Accuracy: {acc*100:.2f}%")
+    print("="*70)
+
+if __name__ == "__main__":
+    main()

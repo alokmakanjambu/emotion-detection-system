@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection - Deteksi Emosi Teks</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-emoji">🎭</span>
+                <h1>Emotion<span class="highlight">AI</span></h1>
+            </div>
+            <p class="tagline">Deteksi Emosi dari Teks dengan AI</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="id">
+                    <span class="flag">🇮🇩</span>
+                    Indonesia
+                </button>
+                <button class="lang-btn" data-lang="en">
+                    <span class="flag">🇺🇸</span>
+                    English
+                </button>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <textarea id="textInput" placeholder="Ketik atau paste teks di sini untuk dianalisis emosinya..."
+                        rows="4" maxlength="1000"></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/1000
+                    </div>
+                </div>
+                <button id="analyzeBtn" class="analyze-btn">
+                    <span class="btn-icon">✨</span>
+                    <span class="btn-text">Analisis Emosi</span>
+                    <span class="btn-loading">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Result Section -->
+            <div id="resultSection" class="result-section hidden">
+                <div class="result-card">
+                    <div class="emotion-display">
+                        <span id="emotionEmoji" class="emotion-emoji">😊</span>
+                        <h2 id="emotionLabel" class="emotion-label">Joy</h2>
+                        <div class="confidence-bar">
+                            <div id="confidenceBar" class="confidence-fill"></div>
+                        </div>
+                        <p id="confidenceText" class="confidence-text">Confidence: 95%</p>
+                    </div>
+
+                    <div class="probabilities-section">
+                        <h3>Distribusi Probabilitas</h3>
+                        <div id="probabilitiesChart" class="probabilities-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="historySection" class="history-section hidden">
+                <h3>Riwayat Analisis</h3>
+                <div id="historyList" class="history-list"></div>
+                <button id="clearHistoryBtn" class="clear-history-btn">Hapus Riwayat</button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by IndoBERT & LSTM</p>
+            <div class="api-status">
+                <span id="apiStatus" class="status-dot"></span>
+                <span id="apiStatusText">Checking API...</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
