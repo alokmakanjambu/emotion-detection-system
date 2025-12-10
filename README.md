@@ -18,7 +18,7 @@ AI-powered emotion detection from text supporting **English** and **Indonesian**
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/emotion-detection-system.git
+git clone https://github.com/alokmakanjambu/emotion-detection-system.git
 cd emotion-detection-system
 
 # Setup
